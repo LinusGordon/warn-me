@@ -1,13 +1,14 @@
-var elements = document.getElementsByTagName('*');
-
 var triggers = ["9 11", "9-11", "9/11", "ableism", "abusive", "ageism", "meth", "alcoholism", "amputation", "animal abuse", "animal death", "animal violence", "bestiality", "gore", "blood", "corpse", "bully", "cannibal", "car accident", "child abuse", "childbirth", "classism", "death", "dying", "decapitation", "abuse", "drug", "heroin", "cocaine", "molly", "ecstacy", "bath salts", "eating disorder", "anorexia", "binge eating", "bulimia", "fatphobia", "forced captivity", "guns", "holocaust", "hitler", "homophobia", "hostage", "incest", "kidnap", "murder", "nazi", "needle", "overdose", "pedophilia", "prostitution", "PTSD", "racism", "racist", "rape", "rape ", "scarification", "self-harm", "self harm", "cutting", "sexism", "skeleton", "skull", "slavery", "slurs", "suicide", "suicidal", "swearing", "terminal illness", "terrorism", "torture", "transphobia", "violence", "warfare", "weapon"];
-
-var message = "Warning: this page may contain words such as"
-var found = 0;
 
 function isLetter(str) {
   return str.length === 1 && str.match(/[a-z]/i);
 }
+
+function findtrigs() {
+var found = 0;
+var message = "Warning: this page may contain words such as"
+
+var elements = document.getElementsByTagName('*');
 
 for(var i = 0; i < elements.length; i++) {
 	var element = elements[i];
@@ -38,11 +39,28 @@ for(var i = 0; i < elements.length; i++) {
 		}
 	}
 }
-
-if(found > 0) {
-	if(found === 1) {
-		message = message.slice(0, -1);
+	if(found > 0) {
+		if(found === 1) {
+			message = message.slice(0, -1);
+		}
+		message += " and other triggering words."
+		alert(message);
 	}
-	message += " and other triggering words."
-	alert(message);
 }
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    // fired when a mutation occurs
+    findtrigs();
+    // ...
+});
+
+// define what element should be observed by the observer
+// and what types of mutations trigger the callback
+observer.observe(document, {
+  attributes: true,
+  subtree: true,
+});
+
+findtrigs();
