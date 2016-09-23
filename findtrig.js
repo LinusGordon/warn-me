@@ -1,11 +1,24 @@
-var triggers = ["dood", "linus", "9 11", "9-11", "9/11", "ableism", "abusive", "ageism", "meth", "alcoholism", "amputation", "animal abuse", "animal death", "animal violence", "bestiality", "gore", "blood", "corpse", "bully", "cannibal", "car accident", "child abuse", "childbirth", "classism", "death", "dying", "decapitation", "abuse", "drug", "heroin", "cocaine", "molly", "ecstacy", "bath salts", "eating disorder", "anorexia", "binge eating", "bulimia", "fatphobia", "forced captivity", "guns", "holocaust", "hitler", "homophobia", "hostage", "incest", "kidnap", "murder", "nazi", "needle", "overdose", "pedophilia", "prostitution", "PTSD", "racism", "racist", "rape", "rape ", "scarification", "self-harm", "self harm", "cutting", "sexism", "skeleton", "skull", "slavery", "slurs", "suicide", "suicidal", "swearing", "terminal illness", "terrorism", "torture", "transphobia", "violence", "warfare", "weapon"];
+var triggers = ["9 11", "9-11", "9/11", "ableism", "abusive", "ageism", "meth", "alcoholism", "amputation", "animal abuse", "animal death", "animal violence", "bestiality", "gore", "corpse", "bully", "cannibal", "car accident", "child abuse", "childbirth", "classism", "death", "decapitation", "abuse", "drug", "heroin", "cocaine", "molly", "ecstacy", "bath salts", "eating disorder", "anorexia", "binge eating", "bulimia", "fatphobia", "forced captivity", "holocaust", "hitler", "homophobia", "hostage", "incest", "kidnap", "murder", "nazi", "overdose", "pedophilia", "prostitution", "PTSD", "racism", "racist", "rape", "scarification", "self-harm", "self harm", "cutting", "sexism", "slavery", "slurs", "suicide", "suicidal", "swearing", "terminal illness", "terrorism", "torture", "transphobia", "violence", "warfare"];
 
 function isLetter(str) {
   return str.length === 1 && str.match(/[a-z]/i);
 }
 
+// Adds all user-added words to list of words
+chrome.storage.sync.get("data", function(items) {
+		if (!chrome.runtime.error) {
+			var storedTrigs = items["data"];
+			console.log("stored trigs", storedTrigs);
+			if(storedTrigs !== undefined) {
+				for(var i = triggers.length; i < storedTrigs.length; i++) {
+					triggers.push(storedTrigs[i]);
+				}
+			}
+	 	}
+	});
+
 function findtrigs() {
-	
+
 	var found = 0;
 	var message = "Warning: this page may contain words such as";
 	var elements = document.getElementsByTagName('*');
@@ -21,8 +34,7 @@ function findtrigs() {
 					//find trigger word in string
 					var index = string.search(triggers[k]);
 					if(index !== -1) {
-						//end of trigger word in string
-						var end = index + triggers[k].length;
+						var end = index + triggers[k].length;//end of trigger word in string
 						//if the next thing is a letter, then it is not a trigger word
 						// i.e. "Method" will not find a match with "Meth"
 						if(string[end] === undefined || !isLetter(string[index + triggers[k].length])) {
@@ -61,4 +73,38 @@ observer.observe(document, {
   subtree: true,
 });
 
-findtrigs();
+// Load all trigger warnings into dropdown
+window.onload = function () {
+    var select = document.getElementById("dropdown");
+    for(var i = triggers.length - 1; i > 0; i--) {
+        var option = document.createElement('option');
+        option.text = option.value = triggers[i];
+        select.add(option, 0);
+    }
+    document.getElementById("dropdown").value = "";
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+
+	findtrigs();
+
+	function addWord() {
+		var newWord = document.getElementById("myText").value;
+		console.log(newWord);
+		// Remove any non-letter character and lower case new Word
+	    newWord = newWord.replace(/[^a-zA-Z-]/g, '').toLowerCase();
+	    if(triggers.indexOf(newWord) === -1 && newWord !== "") {
+	    	triggers.push(newWord);
+	    	// Add word to sync storage for later use
+	    	chrome.storage.sync.set({ "data" : triggers }, function() {
+	    		if (chrome.runtime.error) {
+	      			console.log("Runtime error.");
+	    		}
+  			});
+	    }
+	    document.getElementById("myText").value = " "; // clear dropdown
+
+  		
+	}
+	document.getElementById('add-Word').onclick = addWord;
+});
