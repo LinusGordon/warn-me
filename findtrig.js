@@ -10,7 +10,6 @@ function getCustomWords() {
 	chrome.storage.sync.get("data", function(items) {
 			if (!chrome.runtime.error) {
 				var storedTrigs = items["data"];
-				console.log("stored trigs", storedTrigs);
 				if(storedTrigs !== undefined) {
 					for(var i = triggers.length; i < storedTrigs.length; i++) {
 						triggers.push(storedTrigs[i]);
@@ -26,8 +25,6 @@ function findtrigs() {
 	var found = 0;
 	var message = "Warning: this page may contain words such as";
 	var elements = document.getElementsByTagName('*');
-
-	console.log(triggers);
 
 	for(var i = 0; i < elements.length; i++) {
 		var element = elements[i];
@@ -92,13 +89,10 @@ window.onload = function () {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-
 	findtrigs();
-
 	function addWord() {
-		var newWord = document.getElementById("myText").value;
-		console.log(newWord);
-		// Remove any non-letter character and lower case new Word
+	    var newWord = document.getElementById("myText").value;
+	    // Remove any non-letter character and lower case new Word
 	    newWord = newWord.replace(/[^a-zA-Z-]/g, '').toLowerCase();
 	    if(triggers.indexOf(newWord) === -1 && newWord !== "") {
 	    	triggers.push(newWord);
